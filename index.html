@@ -1,96 +1,475 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 <title>CUERPO / SONIDO — Head Tracking</title>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-:root{color-scheme:dark;--bg:#050807;--panel:#0a1110;--panel2:#0d1715;--line:#18352f;--muted:#78938b;--white:#e7fff7;--neon:#00ffc3;--neon2:#7dffe0;--warn:#ffbf69}
+
+:root{
+  color-scheme:dark;
+  --bg:#050807;
+  --panel:#0a1110;
+  --panel2:#0d1715;
+  --line:#18352f;
+  --muted:#78938b;
+  --white:#e7fff7;
+  --neon:#00ffc3;
+  --neon2:#7dffe0;
+  --warn:#ffbf69;
+}
+
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--white);font-family:'Space Grotesk',Arial,sans-serif;min-height:100vh}
-body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.11;background-image:linear-gradient(rgba(0,255,195,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,195,.08) 1px,transparent 1px);background-size:48px 48px;mask-image:linear-gradient(to bottom,black,transparent 90%);z-index:-1}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--white);
+  font-family:'Space Grotesk',Arial,sans-serif;
+  min-height:100vh;
+}
+
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.11;
+  background-image:
+    linear-gradient(rgba(0,255,195,.08) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,255,195,.08) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:linear-gradient(to bottom,black,transparent 90%);
+  z-index:-1;
+}
+
 .mono{font-family:'Space Mono',monospace}
-header{height:76px;padding:0 clamp(18px,4vw,56px);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:rgba(5,8,7,.88)}
-.brand{display:flex;align-items:center;gap:14px}.brand-mark{width:34px;height:34px;border:1px solid var(--neon);display:grid;place-items:center;color:var(--neon);font:700 13px 'Space Mono';box-shadow:0 0 18px #00ffc322}
-.brand h1{font:700 13px 'Space Mono';letter-spacing:.16em;margin:0}.brand small{display:block;color:var(--muted);font:10px 'Space Mono';letter-spacing:.1em;margin-top:5px}
-.status{font:10px 'Space Mono';letter-spacing:.08em;color:var(--warn);display:flex;align-items:center;gap:9px}.status:before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}.status.ok{color:var(--neon)}
-main{max-width:1440px;margin:auto;padding:28px clamp(16px,4vw,56px) 50px}
-.intro{display:flex;justify-content:space-between;align-items:end;gap:20px;margin:4px 0 22px}.eyebrow{font:10px 'Space Mono';color:var(--neon);letter-spacing:.2em;margin-bottom:10px}.intro h2{font-size:clamp(27px,4vw,46px);line-height:1;margin:0;letter-spacing:-.05em}.intro p{max-width:390px;color:var(--muted);font-size:12px;line-height:1.6;margin:0}
-.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.85fr);gap:14px}
-.panel{background:linear-gradient(145deg,rgba(13,23,21,.96),rgba(7,13,12,.96));border:1px solid var(--line);position:relative;min-width:0}
-.panel-head{height:47px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);font:10px 'Space Mono';letter-spacing:.13em;color:var(--muted)}
+
+header{
+  height:76px;
+  padding:0 clamp(18px,4vw,56px);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--line);
+  background:rgba(5,8,7,.88);
+}
+
+.brand{display:flex;align-items:center;gap:14px}
+.brand-mark{
+  width:34px;height:34px;
+  border:1px solid var(--neon);
+  display:grid;place-items:center;
+  color:var(--neon);
+  font:700 13px 'Space Mono';
+  box-shadow:0 0 18px #00ffc322;
+}
+.brand h1{
+  font:700 13px 'Space Mono';
+  letter-spacing:.16em;
+  margin:0;
+}
+.brand small{
+  display:block;
+  color:var(--muted);
+  font:10px 'Space Mono';
+  letter-spacing:.1em;
+  margin-top:5px;
+}
+
+.status{
+  font:10px 'Space Mono';
+  letter-spacing:.08em;
+  color:var(--warn);
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+.status:before{
+  content:"";
+  width:7px;height:7px;
+  border-radius:50%;
+  background:currentColor;
+  box-shadow:0 0 10px currentColor;
+}
+.status.ok{color:var(--neon)}
+
+main{
+  max-width:1440px;
+  margin:auto;
+  padding:28px clamp(16px,4vw,56px) 50px;
+}
+
+.intro{
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  gap:20px;
+  margin:4px 0 22px;
+}
+.eyebrow{
+  font:10px 'Space Mono';
+  color:var(--neon);
+  letter-spacing:.2em;
+  margin-bottom:10px;
+}
+.intro h2{
+  font-size:clamp(27px,4vw,46px);
+  line-height:1;
+  margin:0;
+  letter-spacing:-.05em;
+}
+.intro p{
+  max-width:390px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.6;
+  margin:0;
+}
+
+.layout{
+  display:grid;
+  grid-template-columns:minmax(0,1.55fr) minmax(300px,.85fr);
+  gap:14px;
+}
+
+.panel{
+  background:linear-gradient(145deg,rgba(13,23,21,.96),rgba(7,13,12,.96));
+  border:1px solid var(--line);
+  position:relative;
+  min-width:0;
+}
+
+.panel-head{
+  height:47px;
+  padding:0 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--line);
+  font:10px 'Space Mono';
+  letter-spacing:.13em;
+  color:var(--muted);
+}
 .panel-head strong{font-weight:400;color:var(--neon)}
-.viewer{height:clamp(350px,54vw,590px);position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 45%,#0b2820 0%,#07130f 42%,#050908 76%)}
+
+.viewer{
+  height:clamp(350px,54vw,590px);
+  position:relative;
+  overflow:hidden;
+  background:radial-gradient(ellipse at 50% 45%,#0b2820 0%,#07130f 42%,#050908 76%);
+}
 #scene{width:100%;height:100%;display:block}
-.corner{position:absolute;width:18px;height:18px;border-color:var(--neon);opacity:.8}.tl{top:14px;left:14px;border-top:1px solid;border-left:1px solid}.tr{top:14px;right:14px;border-top:1px solid;border-right:1px solid}.bl{bottom:14px;left:14px;border-bottom:1px solid;border-left:1px solid}.br{bottom:14px;right:14px;border-bottom:1px solid;border-right:1px solid}
-.view-label{position:absolute;left:22px;top:20px;color:#8db8aa;font:9px 'Space Mono';letter-spacing:.14em}.direction{position:absolute;bottom:22px;left:22px;color:var(--neon);font:700 12px 'Space Mono';letter-spacing:.1em}
-.viewer-meta{position:absolute;right:22px;bottom:22px;text-align:right;color:#78938b;font:9px 'Space Mono';line-height:1.8}
-.metrics{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
-.metric{padding:16px 18px;border-right:1px solid var(--line)}.metric:last-child{border:0}.metric label{display:block;color:var(--muted);font:9px 'Space Mono';letter-spacing:.15em}.metric strong{display:block;color:var(--neon);font:24px 'Space Mono';margin-top:7px;font-weight:400;font-variant-numeric:tabular-nums}
-.sensor-actions{padding:13px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid var(--line)}.hint{font:9px 'Space Mono';color:var(--muted);line-height:1.5}
-button{font:10px 'Space Mono';letter-spacing:.08em;border:1px solid var(--neon);background:transparent;color:var(--neon);padding:11px 14px;cursor:pointer;transition:.2s}button:hover{background:var(--neon);color:#04110d;box-shadow:0 0 18px #00ffc333}button:disabled{opacity:.35;cursor:not-allowed}
+
+.corner{
+  position:absolute;
+  width:18px;height:18px;
+  border-color:var(--neon);
+  opacity:.8;
+}
+.tl{top:14px;left:14px;border-top:1px solid;border-left:1px solid}
+.tr{top:14px;right:14px;border-top:1px solid;border-right:1px solid}
+.bl{bottom:14px;left:14px;border-bottom:1px solid;border-left:1px solid}
+.br{bottom:14px;right:14px;border-bottom:1px solid;border-right:1px solid}
+
+.view-label{
+  position:absolute;
+  left:22px;top:20px;
+  color:#8db8aa;
+  font:9px 'Space Mono';
+  letter-spacing:.14em;
+}
+.direction{
+  position:absolute;
+  bottom:22px;left:22px;
+  color:var(--neon);
+  font:700 12px 'Space Mono';
+  letter-spacing:.1em;
+}
+.viewer-meta{
+  position:absolute;
+  right:22px;bottom:22px;
+  text-align:right;
+  color:#78938b;
+  font:9px 'Space Mono';
+  line-height:1.8;
+}
+
+.metrics{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  border-top:1px solid var(--line);
+}
+.metric{
+  padding:16px 18px;
+  border-right:1px solid var(--line);
+  min-width:0;
+}
+.metric:last-child{border:0}
+.metric label{
+  display:block;
+  color:var(--muted);
+  font:9px 'Space Mono';
+  letter-spacing:.1em;
+}
+.metric strong{
+  display:block;
+  color:var(--neon);
+  font:24px 'Space Mono';
+  margin-top:7px;
+  font-weight:400;
+  font-variant-numeric:tabular-nums;
+}
+
+.sensor-actions{
+  padding:13px 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  border-top:1px solid var(--line);
+}
+.hint{
+  font:9px 'Space Mono';
+  color:var(--muted);
+  line-height:1.5;
+}
+
+button{
+  font:10px 'Space Mono';
+  letter-spacing:.08em;
+  border:1px solid var(--neon);
+  background:transparent;
+  color:var(--neon);
+  padding:11px 14px;
+  cursor:pointer;
+  transition:.2s;
+}
+button:hover{
+  background:var(--neon);
+  color:#04110d;
+  box-shadow:0 0 18px #00ffc333;
+}
+button:disabled{opacity:.35;cursor:not-allowed}
+
 .audio-panel{display:flex;flex-direction:column}
-.audio-body{padding:19px;display:flex;flex-direction:column;gap:17px;flex:1}
-.track-kicker{font:9px 'Space Mono';letter-spacing:.16em;color:var(--neon)}.track-title{font-size:22px;font-weight:600;line-height:1.2;overflow-wrap:anywhere}.track-sub{font:10px 'Space Mono';color:var(--muted);margin-top:6px}
-.wave{height:90px;display:flex;align-items:center;gap:3px;padding:0 2px;border-top:1px solid #18352f;border-bottom:1px solid #18352f}
-.wave i{display:block;flex:1;min-width:2px;height:var(--h);background:#1c6654;opacity:.8;transition:height .15s,background .15s}.wave.playing i:nth-child(3n){background:var(--neon);box-shadow:0 0 8px #00ffc355}
-.progress-wrap{display:flex;flex-direction:column;gap:8px}.progress{width:100%;height:3px;background:#20352f;appearance:none;cursor:pointer}.progress::-webkit-slider-thumb{appearance:none;width:9px;height:9px;border-radius:50%;background:var(--neon);box-shadow:0 0 8px var(--neon)}.times{display:flex;justify-content:space-between;color:var(--muted);font:9px 'Space Mono'}
-.player-controls{display:flex;align-items:center;justify-content:center;gap:18px}.icon-btn{border:0;color:var(--muted);padding:8px;background:transparent;font-size:17px}.icon-btn:hover{background:transparent;color:var(--neon);box-shadow:none}.play-btn{width:48px;height:48px;border-radius:50%;padding:0;background:var(--neon);color:#04110d;font-size:17px;border:0}.play-btn:hover{background:var(--neon2);color:#04110d}
-.volume-row{display:flex;align-items:center;gap:12px;color:var(--muted);font:9px 'Space Mono'}.volume-row input{flex:1;accent-color:var(--neon)}
-.playlist-head{display:flex;justify-content:space-between;align-items:center;font:9px 'Space Mono';letter-spacing:.13em;color:var(--muted);padding-bottom:9px;border-bottom:1px solid var(--line)}
-.file-label{cursor:pointer;color:var(--neon);font:9px 'Space Mono';border:1px solid var(--line);padding:8px 10px}.file-label:hover{border-color:var(--neon)}#audioFiles{display:none}
-.playlist{display:flex;flex-direction:column;gap:5px;max-height:180px;overflow:auto}
-.track{width:100%;display:flex;align-items:center;gap:10px;text-align:left;padding:10px;border:1px solid transparent;color:var(--muted);background:transparent;font:10px 'Space Mono';letter-spacing:0}.track:hover{background:#10201b;color:var(--white);box-shadow:none}.track.active{border-color:#1b5748;background:#0c211a;color:var(--neon)}.track-num{color:#53746a;width:18px}.track-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}.empty{color:#587068;font:10px 'Space Mono';line-height:1.6;padding:10px 0}
-.audio-note{font:9px 'Space Mono';color:#587068;line-height:1.6;border-top:1px solid var(--line);padding-top:12px}
-/* ESCALA DE PERCEPCIÓN CORPORAL */
-.scale-panel{
+.audio-body{
+  padding:19px;
+  display:flex;
+  flex-direction:column;
+  gap:17px;
+  flex:1;
+}
+.track-kicker{
+  font:9px 'Space Mono';
+  letter-spacing:.16em;
+  color:var(--neon);
+}
+.track-title{
+  font-size:22px;
+  font-weight:600;
+  line-height:1.2;
+  overflow-wrap:anywhere;
+}
+.track-sub{
+  font:10px 'Space Mono';
+  color:var(--muted);
+  margin-top:6px;
+}
+
+.wave{
+  height:90px;
+  display:flex;
+  align-items:center;
+  gap:3px;
+  padding:0 2px;
+  border-top:1px solid #18352f;
+  border-bottom:1px solid #18352f;
+}
+.wave i{
+  display:block;
+  flex:1;
+  min-width:2px;
+  height:var(--h);
+  background:#1c6654;
+  opacity:.8;
+  transition:height .15s,background .15s;
+}
+.wave.playing i:nth-child(3n){
+  background:var(--neon);
+  box-shadow:0 0 8px #00ffc355;
+}
+
+.progress-wrap{display:flex;flex-direction:column;gap:8px}
+.progress{
+  width:100%;height:3px;
+  background:#20352f;
+  appearance:none;
+  cursor:pointer;
+}
+.progress::-webkit-slider-thumb{
+  appearance:none;
+  width:9px;height:9px;
+  border-radius:50%;
+  background:var(--neon);
+  box-shadow:0 0 8px var(--neon);
+}
+.times{
+  display:flex;
+  justify-content:space-between;
+  color:var(--muted);
+  font:9px 'Space Mono';
+}
+
+.player-controls{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+}
+.icon-btn{
+  border:0;
+  color:var(--muted);
+  padding:8px;
+  background:transparent;
+  font-size:17px;
+}
+.icon-btn:hover{
+  background:transparent;
+  color:var(--neon);
+  box-shadow:none;
+}
+.play-btn{
+  width:48px;height:48px;
+  border-radius:50%;
+  padding:0;
+  background:var(--neon);
+  color:#04110d;
+  font-size:17px;
+  border:0;
+}
+.play-btn:hover{background:var(--neon2);color:#04110d}
+
+.volume-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  color:var(--muted);
+  font:9px 'Space Mono';
+}
+.volume-row input{flex:1;accent-color:var(--neon)}
+
+.playlist-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font:9px 'Space Mono';
+  letter-spacing:.13em;
+  color:var(--muted);
+  padding-bottom:9px;
+  border-bottom:1px solid var(--line);
+}
+.file-label{
+  cursor:pointer;
+  color:var(--neon);
+  font:9px 'Space Mono';
+  border:1px solid var(--line);
+  padding:8px 10px;
+}
+.file-label:hover{border-color:var(--neon)}
+#audioFiles{display:none}
+
+.playlist{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  max-height:180px;
+  overflow:auto;
+}
+.track{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  text-align:left;
+  padding:10px;
+  border:1px solid transparent;
+  color:var(--muted);
+  background:transparent;
+  font:10px 'Space Mono';
+  letter-spacing:0;
+}
+.track:hover{
+  background:#10201b;
+  color:var(--white);
+  box-shadow:none;
+}
+.track.active{
+  border-color:#1b5748;
+  background:#0c211a;
+  color:var(--neon);
+}
+.track-num{color:#53746a;width:18px}
+.track-name{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  flex:1;
+}
+.empty{
+  color:#587068;
+  font:10px 'Space Mono';
+  line-height:1.6;
+  padding:10px 0;
+}
+.audio-note{
+  font:9px 'Space Mono';
+  color:#587068;
+  line-height:1.6;
+  border-top:1px solid var(--line);
+  padding-top:12px;
+}
+
+.scale-panel,.data-panel{
   margin-top:18px;
   padding:24px;
   background:linear-gradient(145deg,rgba(13,23,21,.96),rgba(7,13,12,.96));
   border:1px solid var(--line);
 }
-
-.scale-heading{
+.scale-heading,.data-heading{
   display:flex;
   justify-content:space-between;
   align-items:center;
   gap:12px;
   margin-bottom:22px;
 }
-
-.scale-heading span{
+.scale-heading span,.data-heading span{
   font:10px 'Space Mono';
   letter-spacing:.13em;
   color:var(--muted);
 }
-
-.scale-question{
-  font-size:17px;
-  font-weight:600;
-  margin-bottom:8px;
-}
-
+.scale-question{font-size:17px;font-weight:600;margin-bottom:8px}
 .scale-description{
   font-size:11px;
   color:var(--muted);
   margin-bottom:24px;
 }
-
 .scale-options{
   display:grid;
   grid-template-columns:repeat(11,1fr);
   gap:8px;
   align-items:center;
 }
-
 .scale-option{
   display:flex;
   flex-direction:column;
   align-items:center;
   gap:9px;
 }
-
 .scale-circle{
   width:clamp(27px,4vw,43px);
   height:clamp(27px,4vw,43px);
@@ -102,14 +481,12 @@ button{font:10px 'Space Mono';letter-spacing:.08em;border:1px solid var(--neon);
   font:11px 'Space Mono';
   transition:.2s;
 }
-
 .scale-circle:hover{
   border-color:var(--neon);
   color:var(--neon);
   background:#10251e;
   box-shadow:0 0 12px #00ffc333;
 }
-
 .scale-circle.selected{
   background:var(--neon);
   color:#04110d;
@@ -117,14 +494,12 @@ button{font:10px 'Space Mono';letter-spacing:.08em;border:1px solid var(--neon);
   box-shadow:0 0 18px #00ffc377;
   transform:scale(1.12);
 }
-
 .scale-bands{
   display:grid;
   grid-template-columns:4fr 3fr 4fr;
   gap:5px;
   margin-top:19px;
 }
-
 .scale-band{
   text-align:center;
   padding:10px 4px;
@@ -133,11 +508,9 @@ button{font:10px 'Space Mono';letter-spacing:.08em;border:1px solid var(--neon);
   color:var(--muted);
   line-height:1.6;
 }
-
 .scale-band:nth-child(1){border-color:#00ffc3}
 .scale-band:nth-child(2){border-color:#e5bd65}
 .scale-band:nth-child(3){border-color:#ff716d}
-
 .scale-result{
   margin-top:20px;
   padding:14px;
@@ -148,41 +521,11 @@ button{font:10px 'Space Mono';letter-spacing:.08em;border:1px solid var(--neon);
   color:var(--muted);
   letter-spacing:.08em;
 }
-
 .scale-result strong{
   color:var(--neon);
   font-size:14px;
   display:block;
   margin-top:7px;
-}
-
-@media(max-width:560px){
-  .scale-panel{padding:17px 12px}
-  .scale-options{gap:3px}
-  .scale-circle{width:25px;height:25px;font-size:9px}
-  .scale-band{font-size:7px}
-}
-/* 04 / REGISTRO DE MOVIMIENTO */
-
-.data-panel{
-  margin-top:18px;
-  padding:22px;
-  background:linear-gradient(145deg,rgba(13,23,21,.96),rgba(7,13,12,.96));
-  border:1px solid var(--line);
-}
-
-.data-heading{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-  margin-bottom:20px;
-}
-
-.data-heading span{
-  font:10px 'Space Mono';
-  color:var(--muted);
-  letter-spacing:.13em;
 }
 
 .chart-container{
@@ -191,7 +534,6 @@ button{font:10px 'Space Mono';letter-spacing:.08em;border:1px solid var(--neon);
   height:320px;
   margin-bottom:25px;
 }
-
 .data-legend{
   display:flex;
   gap:20px;
@@ -199,26 +541,19 @@ button{font:10px 'Space Mono';letter-spacing:.08em;border:1px solid var(--neon);
   font:10px 'Space Mono';
   color:var(--muted);
 }
-
 .legend-point{
   display:inline-block;
-  width:8px;
-  height:8px;
+  width:8px;height:8px;
   border-radius:50%;
   margin-right:7px;
 }
-
-.data-table-wrap{
-  overflow-x:auto;
-}
-
+.data-table-wrap{overflow-x:auto}
 .data-table{
   width:100%;
   border-collapse:collapse;
   font:10px 'Space Mono';
   text-align:left;
 }
-
 .data-table th{
   color:var(--neon);
   padding:13px 10px;
@@ -226,24 +561,18 @@ button{font:10px 'Space Mono';letter-spacing:.08em;border:1px solid var(--neon);
   font-weight:400;
   white-space:nowrap;
 }
-
 .data-table td{
   padding:12px 10px;
   color:var(--white);
   border-bottom:1px solid #18352f;
   white-space:nowrap;
 }
-
-.data-table tbody tr:hover{
-  background:#10201b;
-}
-
+.data-table tbody tr:hover{background:#10201b}
 .table-empty{
   color:var(--muted)!important;
   text-align:center;
   padding:25px!important;
 }
-
 .data-actions{
   display:flex;
   justify-content:space-between;
@@ -252,71 +581,246 @@ button{font:10px 'Space Mono';letter-spacing:.08em;border:1px solid var(--neon);
   margin-top:18px;
   flex-wrap:wrap;
 }
-
 .data-counter{
   color:var(--muted);
   font:9px 'Space Mono';
 }
 
+footer{
+  margin-top:16px;
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  color:#4f6d63;
+  font:9px 'Space Mono';
+  letter-spacing:.08em;
+}
+
+
+.spatial-box{border:1px solid var(--line);background:#07110e;padding:13px;display:flex;flex-direction:column;gap:10px}
+.spatial-title{display:flex;justify-content:space-between;gap:8px;color:var(--neon);font:9px 'Space Mono';letter-spacing:.1em}
+#spatialStatus{color:var(--muted);text-align:right}
+.spatial-controls{display:grid;grid-template-columns:1fr 1fr;gap:7px 12px;align-items:center}
+.spatial-controls label{font:9px 'Space Mono';color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.spatial-controls output{color:var(--neon)}
+.spatial-controls input{width:100%;accent-color:var(--neon);grid-column:1/-1;margin:0 0 5px}
+#spatialMap{width:100%;height:115px;background:#081510;border:1px solid #18352f;margin:0;border-radius:0}
+.spatial-hint{font:9px 'Space Mono';line-height:1.5;color:#587068;margin:0}
+
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .viewer{height:55vw;min-height:340px}
+  .audio-body{gap:14px}
+}
 @media(max-width:560px){
-  .data-panel{padding:16px 12px}
+  header{height:66px}
+  .brand h1{font-size:10px}
+  .intro{display:block}
+  .intro p{margin-top:12px}
+  .viewer{height:390px}
+  .metric{padding:13px 10px}
+  .metric strong{font-size:18px}
+  .sensor-actions{align-items:flex-start;flex-direction:column}
+  .audio-body{padding:15px}
+  footer{flex-direction:column}
+  .scale-panel,.data-panel{padding:17px 12px}
+  .scale-options{gap:3px}
+  .scale-circle{width:25px;height:25px;font-size:9px}
+  .scale-band{font-size:7px}
   .chart-container{height:260px}
   .data-heading{align-items:flex-start;flex-direction:column}
 }
-footer{margin-top:16px;display:flex;justify-content:space-between;gap:15px;color:#4f6d63;font:9px 'Space Mono';letter-spacing:.08em}
-@media(max-width:900px){.layout{grid-template-columns:1fr}.viewer{height:55vw;min-height:340px}.audio-body{gap:14px}}
-@media(max-width:560px){header{height:66px}.brand h1{font-size:10px}.intro{display:block}.intro p{margin-top:12px}.viewer{height:390px}.metric{padding:13px 10px}.metric strong{font-size:18px}.sensor-actions{align-items:flex-start;flex-direction:column}.audio-body{padding:15px}footer{flex-direction:column}}
 </style>
 </head>
+
 <body>
+
 <header>
-  <div class="brand"><div class="brand-mark">VX</div><div><h1>CABEZA <span style="color:var(--neon)">/</span> SONIDO</h1><small>INTERACTIVE BODY DATA SYSTEM</small></div></div>
+  <div class="brand">
+    <div class="brand-mark">VX</div>
+    <div>
+      <h1>CABEZA <span style="color:var(--neon)">/</span> SONIDO</h1>
+      <small>INTERACTIVE BODY DATA SYSTEM</small>
+    </div>
+  </div>
   <span id="status" class="status">SENSOR DESCONECTADO</span>
 </header>
+
 <main>
-  <section class="intro">
-    <div><div class="eyebrow">¿CÓMO AFECTA EL RUIDO QUE YA APRENDIMOS A IGNORAR?</div><h2>REVERA<br></h2></div>
-    <p>Revera nace del cuestionamiento sobre el impacto constante del ruido en nuestro entorno urbano y doméstico. Vivimos expuestos a estímulos sonoros como tráfico, construcciones, alarmas y 
-        electrodomésticos. Aunque creemos "habituarnos", la biología demuestra que el sistema nervioso se activa crónicamente en estado de alerta y estrés.</p>
-  </section>
-  <section class="layout">
-    <div class="panel">
-      <div class="panel-head"><span>01 / VISUALIZACIÓN CORPORAL</span><strong>● LIVE DATA</strong></div>
-      <div class="viewer">
-        <canvas id="scene"></canvas>
-        <span class="view-label">POINT CLOUD / HEAD ORIENTATION</span>
-        <span id="direction" class="direction">ESPERANDO SENSOR</span>
-        <span class="viewer-meta">MPU-6050<br>ESP32 · 50 Hz</span>
-        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-      </div>
-      <div class="metrics">
-        <div class="metric"><label>PITCH / X</label><strong id="pitch">0.0°</strong></div>
-        <div class="metric"><label>ROLL / Y</label><strong id="roll">0.0°</strong></div>
-        <div class="metric"><label>YAW / Z</label><strong id="yaw">0.0°</strong></div>
-      </div>
-      <div class="sensor-actions"><span class="hint">Mantén el sensor quieto al iniciar.<br>Recentrar establece la posición de referencia visual.</span><button id="center">↗ RECENTRAR ORIENTACIÓN</button></div>
+
+<section class="intro">
+  <div>
+    <div class="eyebrow">¿CÓMO AFECTA EL RUIDO QUE YA APRENDIMOS A IGNORAR?</div>
+    <h2>REVERA<br></h2>
+  </div>
+  <p>
+    Revera nace del cuestionamiento sobre el impacto constante del ruido
+    en nuestro entorno urbano y doméstico. Vivimos expuestos a estímulos
+    sonoros como tráfico, construcciones, alarmas y electrodomésticos.
+    Aunque creemos "habituarnos", la biología demuestra que el sistema
+    nervioso puede mantenerse en estado de alerta.
+  </p>
+</section>
+
+<section class="layout">
+
+  <div class="panel">
+
+    <div class="panel-head">
+      <span>01 / VISUALIZACIÓN CORPORAL</span>
+      <strong>● LIVE DATA</strong>
     </div>
-    <aside class="panel audio-panel">
-      <div class="panel-head"><span>02 / ESTÍMULO SONORO</span><strong>AUDIO PLAYER</strong></div>
-      <div class="audio-body">
-        <div><div class="track-kicker">CURRENT SOUND EXPERIENCE</div><div class="track-title" id="trackTitle">Selecciona un audio</div><div class="track-sub" id="trackSub">MP3 · WAV · OGG</div></div>
-        <div class="wave" id="wave" aria-hidden="true"></div>
-        <div class="progress-wrap"><input id="progress" class="progress" type="range" min="0" max="1000" value="0" aria-label="Progreso del audio"><div class="times"><span id="currentTime">00:00</span><span id="duration">00:00</span></div></div>
-        <div class="player-controls">
-          <button class="icon-btn" id="prev" aria-label="Audio anterior">|◀</button>
-          <button class="play-btn" id="play" aria-label="Reproducir">▶</button>
-          <button class="icon-btn" id="next" aria-label="Audio siguiente">▶|</button>
-        </div>
-        <div class="volume-row"><span>VOLUME</span><input id="volume" type="range" min="0" max="1" step=".01" value=".8"><span id="volumeValue">80%</span></div>
-        <div>
-          <div class="playlist-head"><span>PLAYLIST / ARCHIVOS LOCALES</span><label class="file-label" for="audioFiles">＋ AGREGAR AUDIO</label><input id="audioFiles" type="file" accept="audio/*,.mp3,.wav,.ogg,.m4a" multiple></div>
-          <div class="playlist" id="playlist"><div class="empty">Aún no hay archivos.<br>Agrega uno o varios audios desde tu computador para comenzar.</div></div>
-        </div>
-        <div class="audio-note">Los archivos se reproducen directamente en este navegador. No se cargan a internet ni se envían al servidor.</div>
+
+    <div class="viewer">
+      <canvas id="scene"></canvas>
+      <span class="view-label">POINT CLOUD / HEAD ORIENTATION</span>
+      <span id="direction" class="direction">ESPERANDO SENSOR</span>
+      <span class="viewer-meta">MPU-6050<br>ESP32 · 50 Hz</span>
+      <i class="corner tl"></i>
+      <i class="corner tr"></i>
+      <i class="corner bl"></i>
+      <i class="corner br"></i>
+    </div>
+
+    <div class="metrics">
+      <div class="metric">
+        <label>PITCH / X</label>
+        <strong id="pitch">0.0°</strong>
       </div>
-    </aside>
-  </section>
-  <!-- 04 / REGISTRO DE MOVIMIENTO -->
+      <div class="metric">
+        <label>ROLL / Y</label>
+        <strong id="roll">0.0°</strong>
+      </div>
+      <div class="metric">
+        <label>YAW / Z</label>
+        <strong id="yaw">0.0°</strong>
+      </div>
+    </div>
+
+    <div class="sensor-actions">
+      <span class="hint">
+        Mantén el sensor quieto al iniciar.<br>
+        Recentrar establece la posición de referencia visual.
+      </span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button id="connectSerial">↗ CONECTAR ESP32</button>
+        <button id="center">↗ RECENTRAR ORIENTACIÓN</button>
+      </div>
+    </div>
+
+    <div class="sensor-actions" style="border-top:1px solid var(--line)">
+      <span class="hint">
+        TRACKING FACIAL / MediaPipe Face Landmarker<br>
+        <span id="faceStatus">CÁMARA INACTIVA</span>
+      </span>
+      <button id="activateFace">◎ ACTIVAR CÁMARA</button>
+    </div>
+
+    <video id="faceVideo" autoplay playsinline muted
+      style="position:fixed;width:2px;height:2px;opacity:0;pointer-events:none;left:-10px;top:-10px">
+    </video>
+
+    <div class="metrics" style="grid-template-columns:repeat(4,1fr)">
+      <div class="metric">
+        <label>CEJAS / BROW DOWN</label>
+        <strong id="browMetric">0.00</strong>
+      </div>
+      <div class="metric">
+        <label>PARPADEO / BLINK</label>
+        <strong id="blinkMetric">0.00</strong>
+      </div>
+      <div class="metric">
+        <label>APERTURA BOCA</label>
+        <strong id="jawMetric">0.00</strong>
+      </div>
+      <div class="metric">
+        <label>ENTRECIERRE</label>
+        <strong id="squintMetric">0.00</strong>
+      </div>
+    </div>
+
+  </div>
+
+  <aside class="panel audio-panel">
+
+    <div class="panel-head">
+      <span>02 / ESTÍMULO SONORO</span>
+      <strong>AUDIO PLAYER</strong>
+    </div>
+
+    <div class="audio-body">
+
+      <div>
+        <div class="track-kicker">CURRENT SOUND EXPERIENCE</div>
+        <div class="track-title" id="trackTitle">Selecciona un audio</div>
+        <div class="track-sub" id="trackSub">MP3 · WAV · OGG</div>
+      </div>
+
+      <div class="wave" id="wave" aria-hidden="true"></div>
+
+      <div class="progress-wrap">
+        <input id="progress" class="progress" type="range"
+          min="0" max="1000" value="0" aria-label="Progreso del audio">
+        <div class="times">
+          <span id="currentTime">00:00</span>
+          <span id="duration">00:00</span>
+        </div>
+      </div>
+
+      <div class="player-controls">
+        <button class="icon-btn" id="prev" aria-label="Audio anterior">|◀</button>
+        <button class="play-btn" id="play" aria-label="Reproducir">▶</button>
+        <button class="icon-btn" id="next" aria-label="Audio siguiente">▶|</button>
+      </div>
+
+      <div class="volume-row">
+        <span>VOLUME</span>
+        <input id="volume" type="range" min="0" max="1" step=".01" value=".8">
+        <span id="volumeValue">80%</span>
+      </div>
+
+      <div class="spatial-box">
+        <div class="spatial-title"><span>ESPACIALIZACIÓN 3D</span><span id="spatialStatus">TONE.JS · LISTO</span></div>
+        <div class="spatial-controls">
+          <label for="spatialSpeed">Velocidad de giro <output id="spatialSpeedValue">0.20</output></label>
+          <input id="spatialSpeed" type="range" min="0.02" max="1.5" step="0.01" value="0.20">
+          <label for="spatialRadius">Distancia <output id="spatialRadiusValue">3.0</output></label>
+          <input id="spatialRadius" type="range" min="0.5" max="8" step="0.1" value="3">
+          <label for="spatialElevation">Elevación <output id="spatialElevationValue">0.40</output></label>
+          <input id="spatialElevation" type="range" min="0" max="1" step="0.05" value="0.4">
+          <label for="spatialDepth">Vaivén de profundidad <output id="spatialDepthValue">0.30</output></label>
+          <input id="spatialDepth" type="range" min="0" max="1" step="0.05" value="0.3">
+          <label for="spatialReverb">Reverb <output id="spatialReverbValue">0.40</output></label>
+          <input id="spatialReverb" type="range" min="0" max="1" step="0.05" value="0.4">
+        </div>
+        <canvas id="spatialMap" width="260" height="150" aria-label="Posición espacial del sonido"></canvas>
+        <p class="spatial-hint">El punto verde representa la posición del sonido alrededor de tu cabeza. Usa audífonos para percibir el efecto 3D.</p>
+      </div>
+
+      <div>
+        <div class="playlist-head">
+          <span>PLAYLIST / ARCHIVOS LOCALES</span>
+          <label class="file-label" for="audioFiles">＋ AGREGAR AUDIO</label>
+          <input id="audioFiles" type="file"
+            accept="audio/*,.mp3,.wav,.ogg,.m4a" multiple>
+        </div>
+        <div class="playlist" id="playlist">
+          <div class="empty">
+            Aún no hay archivos.<br>
+            Agrega uno o varios audios desde tu computador para comenzar.
+          </div>
+        </div>
+      </div>
+
+      <div class="audio-note">
+        Los archivos se reproducen directamente en este navegador.
+        Tone.js aplica espacialización 3D al audio seleccionado. Los archivos no se envían a un servidor.
+      </div>
+
+    </div>
+  </aside>
+
+</section>
 
 <section class="data-panel">
 
@@ -325,35 +829,28 @@ footer{margin-top:16px;display:flex;justify-content:space-between;gap:15px;color
     <span id="recordStatus">ESPERANDO AUDIO</span>
   </div>
 
-  <h3 style="font-size:17px;margin-bottom:8px;">
+  <h3 style="font-size:17px;margin-bottom:8px">
     Movimiento corporal durante el estímulo
   </h3>
 
-  <p style="font-size:11px;color:var(--muted);margin-bottom:20px;">
+  <p style="font-size:11px;color:var(--muted);margin-bottom:20px">
     Evolución de la orientación de la cabeza durante la reproducción sonora.
   </p>
 
-  <div class="data-legend">
-    <span>
-      <i class="legend-point" style="background:#00ffc3"></i>
-      PITCH
-    </span>
-
-    <span>
-      <i class="legend-point" style="background:#ffbf69"></i>
-      ROLL
-    </span>
+  <div class="data-legend" style="display:flex;flex-wrap:wrap;gap:10px 16px">
+    <span><i class="legend-point" style="background:#00ffc3"></i>PITCH</span>
+    <span><i class="legend-point" style="background:#ffbf69"></i>ROLL</span>
+    <span><i class="legend-point" style="background:#b58cff"></i>CEÑO</span>
+    <span><i class="legend-point" style="background:#ff78b5"></i>PARPADEO</span>
+    <span><i class="legend-point" style="background:#62b7ff"></i>BOCA</span>
+    <span><i class="legend-point" style="background:#f5e56b"></i>ENTRECIERRE</span>
   </div>
-
-  <!-- GRÁFICA -->
 
   <div class="chart-container">
     <canvas id="movementChart"></canvas>
   </div>
 
-  <!-- TABLA -->
-
-  <div style="border-top:1px solid var(--line);padding-top:20px;">
+  <div style="border-top:1px solid var(--line);padding-top:20px">
 
     <div class="data-heading">
       <span>EVENTOS DETECTADOS</span>
@@ -361,9 +858,7 @@ footer{margin-top:16px;display:flex;justify-content:space-between;gap:15px;color
     </div>
 
     <div class="data-table-wrap">
-
       <table class="data-table">
-
         <thead>
           <tr>
             <th>TIEMPO AUDIO</th>
@@ -372,518 +867,1567 @@ footer{margin-top:16px;display:flex;justify-content:space-between;gap:15px;color
             <th>VARIACIÓN (Z)</th>
           </tr>
         </thead>
-
         <tbody id="eventsBody">
-
           <tr>
             <td colspan="4" class="table-empty">
               AÚN NO HAY MOVIMIENTOS REGISTRADOS
             </td>
           </tr>
-
         </tbody>
-
       </table>
-
     </div>
 
   </div>
 
-  <!-- EXPORTAR -->
-
   <div class="data-actions">
-
-    <span class="data-counter" id="sampleCounter">
-      0 MUESTRAS REGISTRADAS
-    </span>
-
-    <button id="downloadCSV">
-      ↓ DESCARGAR DATOS CSV
-    </button>
-
+    <span class="data-counter" id="sampleCounter">0 MUESTRAS REGISTRADAS</span>
+    <button id="downloadCSV">↓ DESCARGAR DATOS CSV</button>
   </div>
 
 </section>
-    <!-- 03 / ESCALA DE PERCEPCIÓN CORPORAL -->
-  <section class="scale-panel">
 
-    <div class="scale-heading">
-      <span>04 / REGISTRO SUBJETIVO</span>
-      <span>SELF-REPORT / 0—10</span>
-    </div>
+<section class="scale-panel">
 
-    <div class="scale-question">
-      ¿Cómo percibes tu estado corporal en este momento?
-    </div>
+  <div class="scale-heading">
+    <span>04 / REGISTRO SUBJETIVO</span>
+    <span>SELF-REPORT / 0—10</span>
+  </div>
 
-    <div class="scale-description">
-      Selecciona el número que mejor represente cómo te sientes después de escuchar el estímulo sonoro.
-    </div>
+  <div class="scale-question">
+    ¿Cómo percibes tu estado corporal en este momento?
+  </div>
 
-    <div class="scale-options" id="scaleOptions">
+  <div class="scale-description">
+    Selecciona el número que mejor represente cómo te sientes después
+    de escuchar el estímulo sonoro.
+  </div>
 
-      <div class="scale-option"><button class="scale-circle" data-value="0">0</button></div>
-      <div class="scale-option"><button class="scale-circle" data-value="1">1</button></div>
-      <div class="scale-option"><button class="scale-circle" data-value="2">2</button></div>
-      <div class="scale-option"><button class="scale-circle" data-value="3">3</button></div>
-      <div class="scale-option"><button class="scale-circle" data-value="4">4</button></div>
-      <div class="scale-option"><button class="scale-circle" data-value="5">5</button></div>
-      <div class="scale-option"><button class="scale-circle" data-value="6">6</button></div>
-      <div class="scale-option"><button class="scale-circle" data-value="7">7</button></div>
-      <div class="scale-option"><button class="scale-circle" data-value="8">8</button></div>
-      <div class="scale-option"><button class="scale-circle" data-value="9">9</button></div>
-      <div class="scale-option"><button class="scale-circle" data-value="10">10</button></div>
+  <div class="scale-options" id="scaleOptions">
+    <div class="scale-option"><button class="scale-circle" data-value="0">0</button></div>
+    <div class="scale-option"><button class="scale-circle" data-value="1">1</button></div>
+    <div class="scale-option"><button class="scale-circle" data-value="2">2</button></div>
+    <div class="scale-option"><button class="scale-circle" data-value="3">3</button></div>
+    <div class="scale-option"><button class="scale-circle" data-value="4">4</button></div>
+    <div class="scale-option"><button class="scale-circle" data-value="5">5</button></div>
+    <div class="scale-option"><button class="scale-circle" data-value="6">6</button></div>
+    <div class="scale-option"><button class="scale-circle" data-value="7">7</button></div>
+    <div class="scale-option"><button class="scale-circle" data-value="8">8</button></div>
+    <div class="scale-option"><button class="scale-circle" data-value="9">9</button></div>
+    <div class="scale-option"><button class="scale-circle" data-value="10">10</button></div>
+  </div>
 
-    </div>
+  <div class="scale-bands">
+    <div class="scale-band">0—3<br>CALMA / REPOSO</div>
+    <div class="scale-band">4—6<br>TENSIÓN MODERADA</div>
+    <div class="scale-band">7—10<br>SOBRECARGA / ESTRÉS</div>
+  </div>
 
-    <div class="scale-bands">
-      <div class="scale-band">
-        0—3<br>CALMA / REPOSO
-      </div>
+  <div class="scale-result" id="scaleResult">
+    ESPERANDO RESPUESTA
+    <strong>—</strong>
+  </div>
 
-      <div class="scale-band">
-        4—6<br>TENSIÓN MODERADA
-      </div>
+</section>
 
-      <div class="scale-band">
-        7—10<br>SOBRECARGA / ESTRÉS
-      </div>
-    </div>
+<footer>
+  <span>CUERPO / SONIDO — PROTOTIPO INTERACTIVO</span>
+  <span>ESP32 + MPU-6050 / WEB INTERFACE</span>
+</footer>
 
-    <div class="scale-result" id="scaleResult">
-      ESPERANDO RESPUESTA
-      <strong>—</strong>
-    </div>
-
-  </section>
-  
-  <footer><span>CUERPO / SONIDO — PROTOTIPO INTERACTIVO</span><span>ESP32 + MPU-6050 / WEB INTERFACE</span></footer>
 </main>
+
 <audio id="audio" preload="metadata"></audio>
+
 <script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
-import Chart from 'https://cdn.jsdelivr.net/npm/chart.js/auto/+esm';
-const canvas=document.getElementById('scene');
-const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-const scene=new THREE.Scene();
-const camera=new THREE.PerspectiveCamera(40,1,.1,100);
-camera.position.set(0,.15,7.8);
-const group=new THREE.Group();scene.add(group);
-const vertices=[];const rng=(a,b)=>a+Math.random()*(b-a);
-for(let i=0;i<6500;i++){const v=Math.acos(rng(-1,1)),u=rng(0,Math.PI*2);let x=.98*Math.sin(v)*Math.cos(u),y=1.28*Math.cos(v)+.5,z=.84*Math.sin(v)*Math.sin(u);if(y<-.55)continue;const face=z>.38&&y>-.42&&y<1.18;if(face)z+=.12*Math.exp(-Math.pow(x/.18,2)-Math.pow((y-.15)/.4,2));vertices.push(x,y,z)}
-for(let i=0;i<2100;i++){const y=rng(-1.65,-.52),t=rng(0,Math.PI*2),w=y>-.98?.38:.38+(-y-.98)*1.35;vertices.push(w*Math.cos(t),y,.42*Math.sin(t)-.12)}
-for(const side of [-1,1])for(let i=0;i<300;i++){const a=rng(0,Math.PI*2),r=Math.sqrt(Math.random());vertices.push(side*.34+.19*r*Math.cos(a),.52+.09*r*Math.sin(a),.79)}
-const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
-const material=new THREE.PointsMaterial({color:0x00ffc3,size:.023,transparent:true,opacity:.94,sizeAttenuation:true});
-const points=new THREE.Points(geometry,material);group.add(points);
-const glow=new THREE.PointLight(0x00ffc3,2);glow.position.set(1,1,3);scene.add(glow);
-function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
-window.addEventListener('resize',resize);resize();
-let latest={pitch:0,roll:0,yaw:0},offset={pitch:0,roll:0,yaw:0},connected=false,lastMessage=0;
-document.getElementById('center').onclick=()=>{offset={...latest}};
-function connect(){const protocol=location.protocol==='https:'?'wss':'ws';const ws=new WebSocket(`${protocol}://${location.host}/ws`);ws.onmessage=e=>{try{latest=JSON.parse(e.data);connected=latest.connected;lastMessage=Date.now()}catch{}};ws.onclose=()=>{connected=false;setTimeout(connect,1200)};ws.onerror=()=>ws.close()}
-connect();
-const rad=Math.PI/180;
-function animate(){requestAnimationFrame(animate);const p=latest.pitch-offset.pitch,r=latest.roll-offset.roll,y=latest.yaw-offset.yaw;const target=new THREE.Euler(p*rad,-y*rad,-r*rad,'YXZ');const q=new THREE.Quaternion().setFromEuler(target);group.quaternion.slerp(q,.18);for(const k of ['pitch','roll','yaw'])document.getElementById(k).textContent=(latest[k]-offset[k]).toFixed(1)+'°';const active=connected&&Date.now()-lastMessage<1500;const status=document.getElementById('status');status.textContent=active?'SENSOR CONECTADO':'SENSOR DESCONECTADO';status.className='status'+(active?' ok':'');let directions=[];if(Math.abs(y)>10)directions.push(y>0?'GIRO A UN LADO':'GIRO AL OTRO LADO');if(Math.abs(p)>10)directions.push(p>0?'INCLINACIÓN FRONTAL':'INCLINACIÓN POSTERIOR');if(Math.abs(r)>10)directions.push('INCLINACIÓN LATERAL');document.getElementById('direction').textContent=active?(directions.join(' · ')||'POSICIÓN CENTRADA'):'ESPERANDO SENSOR';renderer.render(scene,camera)}
-animate();
 
-// Reproductor local: los audios elegidos permanecen en el navegador.
-const audio=document.getElementById('audio'),fileInput=document.getElementById('audioFiles');
-const playlistEl=document.getElementById('playlist'),titleEl=document.getElementById('trackTitle'),subEl=document.getElementById('trackSub');
-const playBtn=document.getElementById('play'),progress=document.getElementById('progress');
-let tracks=[],current=-1;
-const urls=[];
-const wave=document.getElementById('wave');
-for(let i=0;i<54;i++){const bar=document.createElement('i');bar.style.setProperty('--h',(12+Math.abs(Math.sin(i*.53)*Math.cos(i*.17))*68)+'px');wave.appendChild(bar)}
-function timeLabel(s){if(!Number.isFinite(s))return '00:00';const m=Math.floor(s/60),sec=Math.floor(s%60);return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0')}
-function renderPlaylist(){playlistEl.innerHTML='';if(!tracks.length){playlistEl.innerHTML='<div class="empty">Aún no hay archivos.<br>Agrega uno o varios audios desde tu computador para comenzar.</div>';return}tracks.forEach((track,i)=>{const b=document.createElement('button');b.className='track'+(i===current?' active':'');const n=document.createElement('span');n.className='track-num';n.textContent=String(i+1).padStart(2,'0');const name=document.createElement('span');name.className='track-name';name.textContent=track.name;b.append(n,name);b.addEventListener('click',()=>loadTrack(i,true));playlistEl.appendChild(b)})}
-function loadTrack(i,autoplay=false){if(i<0||i>=tracks.length)return;current=i;audio.src=tracks[i].url;titleEl.textContent=tracks[i].name;subEl.textContent='ARCHIVO LOCAL · '+(tracks[i].type||'AUDIO').toUpperCase();progress.value=0;document.getElementById('currentTime').textContent='00:00';document.getElementById('duration').textContent='00:00';renderPlaylist();if(autoplay)audio.play().catch(()=>{});else playBtn.textContent='▶'}
-fileInput.addEventListener('change',e=>{const files=Array.from(e.target.files||[]);files.forEach(file=>{const url=URL.createObjectURL(file);urls.push(url);tracks.push({name:file.name,url,type:file.type.split('/')[1]||'audio'})});if(current<0&&tracks.length)loadTrack(0);else renderPlaylist();fileInput.value=''});
-playBtn.addEventListener('click',()=>{if(!tracks.length){fileInput.click();return}if(audio.paused)audio.play().catch(()=>{});else audio.pause()});
-document.getElementById('prev').addEventListener('click',()=>{if(tracks.length)loadTrack((current-1+tracks.length)%tracks.length,true)});
-document.getElementById('next').addEventListener('click',()=>{if(tracks.length)loadTrack((current+1)%tracks.length,true)});
-audio.addEventListener('play',()=>{playBtn.textContent='Ⅱ';wave.classList.add('playing')});
-audio.addEventListener('pause',()=>{playBtn.textContent='▶';wave.classList.remove('playing')});
-audio.addEventListener('ended',()=>{if(tracks.length)loadTrack((current+1)%tracks.length,true)});
-audio.addEventListener('loadedmetadata',()=>{document.getElementById('duration').textContent=timeLabel(audio.duration)});
-audio.addEventListener('timeupdate',()=>{if(Number.isFinite(audio.duration)&&audio.duration>0){progress.value=Math.round(audio.currentTime/audio.duration*1000);document.getElementById('currentTime').textContent=timeLabel(audio.currentTime)}});
-progress.addEventListener('input',()=>{if(Number.isFinite(audio.duration)&&audio.duration>0)audio.currentTime=(progress.value/1000)*audio.duration});
-const volume=document.getElementById('volume');audio.volume=Number(volume.value);volume.addEventListener('input',()=>{audio.volume=Number(volume.value);document.getElementById('volumeValue').textContent=Math.round(audio.volume*100)+'%'});
-// ==========================================
-// 04 / REGISTRO DE MOVIMIENTO CORPORAL
-// ==========================================
+// ============================================================
+// IMPORTACIONES
+// MediaPipe NO se importa aquí.
+// Se cargará dinámicamente al presionar ACTIVAR CÁMARA.
+// ============================================================
 
-// Almacenamiento de datos
-const recordedSamples = [];
-const movementEvents = [];
+import * as THREE from
+  'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
 
-// Elementos HTML
-const eventsBody = document.getElementById('eventsBody');
-const eventCounter = document.getElementById('eventCounter');
-const sampleCounter = document.getElementById('sampleCounter');
-const recordStatus = document.getElementById('recordStatus');
+import Chart from
+  'https://cdn.jsdelivr.net/npm/chart.js/auto/+esm';
 
-// Configuración de detección
-const MOVEMENT_THRESHOLD = 8; // grados
-const EVENT_COOLDOWN = 600; // milisegundos
 
-let lastEventReference = null;
-let lastEventTime = 0;
+// ============================================================
+// THREE.JS / VISUALIZACIÓN DE CABEZA
+// ============================================================
 
-// Crear gráfica
-const chartContext = document
-  .getElementById('movementChart')
-  .getContext('2d');
+const canvas = document.getElementById('scene');
 
-const movementChart = new Chart(chartContext, {
+const renderer = new THREE.WebGLRenderer({
+  canvas,
+  antialias:true,
+  alpha:true
+});
 
-  type: 'line',
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
-  data: {
-    datasets: [
+const scene = new THREE.Scene();
 
-      {
-        label: 'Pitch',
-        data: [],
-        borderColor: '#00ffc3',
-        backgroundColor: '#00ffc3',
-        borderWidth: 1.8,
-        pointRadius: 0,
-        tension: 0.2
-      },
+const camera = new THREE.PerspectiveCamera(40, 1, .1, 100);
+camera.position.set(0, .15, 7.8);
 
-      {
-        label: 'Roll',
-        data: [],
-        borderColor: '#ffbf69',
-        backgroundColor: '#ffbf69',
-        borderWidth: 1.8,
-        pointRadius: 0,
-        tension: 0.2
-      }
+const group = new THREE.Group();
+scene.add(group);
 
-    ]
-  },
+const rng = (a,b) => a + Math.random() * (b-a);
 
-  options: {
+const fallbackVertices = [];
 
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: false,
+for(let i=0;i<6500;i++){
+  const v=Math.acos(rng(-1,1));
+  const u=rng(0,Math.PI*2);
 
-    interaction: {
-      intersect: false,
-      mode: 'index'
-    },
+  let x=.98*Math.sin(v)*Math.cos(u);
+  let y=1.28*Math.cos(v)+.5;
+  let z=.84*Math.sin(v)*Math.sin(u);
 
-    plugins: {
-      legend: {
-        display: false
-      },
+  if(y<-.55) continue;
 
-      tooltip: {
-        backgroundColor: '#0a1110',
-        borderColor: '#18352f',
-        borderWidth: 1
-      }
-    },
+  const face=z>.38&&y>-.42&&y<1.18;
 
-    scales: {
-
-      x: {
-        type: 'linear',
-
-        title: {
-          display: true,
-          text: 'TIEMPO DEL AUDIO (SEGUNDOS)',
-          color: '#78938b'
-        },
-
-        ticks: {
-          color: '#78938b',
-          callback: value => timeLabel(value)
-        },
-
-        grid: {
-          color: '#18352f'
-        }
-      },
-
-      y: {
-        title: {
-          display: true,
-          text: 'GRADOS (°)',
-          color: '#78938b'
-        },
-
-        ticks: {
-          color: '#78938b'
-        },
-
-        grid: {
-          color: '#18352f'
-        }
-      }
-
-    }
+  if(face){
+    z+=.12*Math.exp(
+      -Math.pow(x/.18,2)-Math.pow((y-.15)/.4,2)
+    );
   }
+
+  fallbackVertices.push(x,y,z);
+}
+
+for(let i=0;i<2100;i++){
+  const y=rng(-1.65,-.52);
+  const t=rng(0,Math.PI*2);
+  const w=y>-.98?.38:.38+(-y-.98)*1.35;
+
+  fallbackVertices.push(
+    w*Math.cos(t),
+    y,
+    .42*Math.sin(t)-.12
+  );
+}
+
+for(const side of [-1,1]){
+  for(let i=0;i<300;i++){
+    const a=rng(0,Math.PI*2);
+    const r=Math.sqrt(Math.random());
+
+    fallbackVertices.push(
+      side*.34+.19*r*Math.cos(a),
+      .52+.09*r*Math.sin(a),
+      .79
+    );
+  }
+}
+
+const geometry = new THREE.BufferGeometry();
+
+geometry.setAttribute(
+  'position',
+  new THREE.Float32BufferAttribute(fallbackVertices,3)
+);
+
+const material = new THREE.PointsMaterial({
+  color:0x00ffc3,
+  size:.023,
+  transparent:true,
+  opacity:.94,
+  sizeAttenuation:true
+});
+
+const points = new THREE.Points(geometry,material);
+group.add(points);
+
+const glow = new THREE.PointLight(0x00ffc3,2);
+glow.position.set(1,1,3);
+scene.add(glow);
+
+function resize(){
+  const w=Math.max(canvas.clientWidth,1);
+  const h=Math.max(canvas.clientHeight,1);
+
+  renderer.setSize(w,h,false);
+
+  camera.aspect=w/h;
+  camera.updateProjectionMatrix();
+}
+
+window.addEventListener('resize',resize);
+resize();
+
+
+// ============================================================
+// ESP32 MPU-6050 / WEB SERIAL
+// Formato esperado: DATA,pitch,roll,yaw
+// ============================================================
+
+let latest={pitch:0,roll:0,yaw:0};
+let offset={pitch:0,roll:0,yaw:0};
+
+let connected=false;
+let lastMessage=0;
+
+let serialPort=null;
+let serialReader=null;
+let serialBuffer='';
+
+const serialDecoder=new TextDecoder();
+
+const serialButton=document.getElementById('connectSerial');
+
+serialButton.addEventListener('click',connectSerial);
+
+async function connectSerial(){
+
+  if(!('serial' in navigator)){
+    alert(
+      'WebSerial no está disponible. Abre esta página en Google Chrome o Edge, mediante HTTPS o localhost.'
+    );
+    return;
+  }
+
+  try{
+
+    serialButton.disabled=true;
+
+    serialPort=await navigator.serial.requestPort();
+
+    await serialPort.open({baudRate:115200});
+
+    connected=true;
+
+    serialButton.textContent='ESP32 CONECTADO';
+    serialButton.disabled=false;
+
+    serialReader=serialPort.readable.getReader();
+    serialBuffer='';
+
+    while(true){
+
+      const {value,done}=await serialReader.read();
+
+      if(done) break;
+
+      serialBuffer+=serialDecoder.decode(value,{stream:true});
+
+      const lines=serialBuffer.split(/\r?\n/);
+      serialBuffer=lines.pop() || '';
+
+      for(const line of lines){
+        parseSerialLine(line.trim());
+      }
+    }
+
+  }catch(error){
+
+    console.error('WebSerial:',error);
+
+    connected=false;
+    serialButton.disabled=false;
+    serialButton.textContent='↗ CONECTAR ESP32';
+
+    if(error.name!=='NotFoundError'){
+      alert('No se pudo conectar al ESP32: '+error.message);
+    }
+
+  }finally{
+
+    try{serialReader?.releaseLock()}catch{}
+    serialReader=null;
+
+  }
+}
+
+function parseSerialLine(line){
+
+  if(!line.startsWith('DATA,')) return;
+
+  const values=line.split(',');
+
+  if(values.length<4) return;
+
+  const pitch=parseFloat(values[1]);
+  const roll=parseFloat(values[2]);
+  const yaw=parseFloat(values[3]);
+
+  if(![pitch,roll,yaw].every(Number.isFinite)) return;
+
+  latest={pitch,roll,yaw};
+
+  connected=true;
+  lastMessage=Date.now();
+}
+
+document.getElementById('center').addEventListener('click',()=>{
+  offset={...latest};
 });
 
 
-// Formatear tiempo incluyendo segundos
-function formatEventTime(seconds) {
+// ============================================================
+// MEDIAPIPE FACE LANDMARKER / WEBCAM
+// IMPORTACIÓN DINÁMICA: ESTA ES LA CORRECCIÓN PRINCIPAL
+// ============================================================
 
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.floor(seconds % 60);
+let faceLandmarker=null;
+let faceStream=null;
+let faceActive=false;
+let faceLoading=false;
 
-  return String(minutes).padStart(2, '0') +
-    ':' +
-    String(remainingSeconds).padStart(2, '0');
+let faceLatest={
+  browDown:0,
+  blink:0,
+  jawOpen:0,
+  squint:0,
+  browDownLeft:0,
+  browDownRight:0,
+  eyeBlinkLeft:0,
+  eyeBlinkRight:0,
+  jawOpenRaw:0,
+  eyeSquintLeft:0,
+  eyeSquintRight:0,
+  faceDetected:false
+};
+
+const faceVideo=document.getElementById('faceVideo');
+const faceStatus=document.getElementById('faceStatus');
+const faceButton=document.getElementById('activateFace');
+
+faceButton.addEventListener('click',()=>{
+
+  if(faceActive){
+    stopFaceTracking();
+  }else{
+    startFaceTracking();
+  }
+
+});
+
+async function startFaceTracking(){
+
+  if(faceLoading || faceActive) return;
+
+  faceLoading=true;
+  faceButton.disabled=true;
+
+  try{
+
+    faceStatus.textContent='SOLICITANDO CÁMARA...';
+
+    // 1. Activar cámara primero, igual que en la prueba exitosa.
+    faceStream=await navigator.mediaDevices.getUserMedia({
+      video:{
+        facingMode:'user',
+        width:{ideal:640},
+        height:{ideal:480}
+      },
+      audio:false
+    });
+
+    faceVideo.srcObject=faceStream;
+
+    await faceVideo.play();
+
+    faceStatus.textContent='CÁMARA ACTIVA / CARGANDO MEDIAPIPE...';
+
+    // 2. Importar MediaPipe solo cuando se necesita.
+    // Esta es la misma dirección que funcionó en prueba_mediapipe.html.
+    const mp=await import(
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/vision_bundle.mjs'
+    );
+
+    faceStatus.textContent='CARGANDO MOTOR DE VISIÓN...';
+
+    // 3. Preparar archivos WASM.
+    const vision=await mp.FilesetResolver.forVisionTasks(
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm'
+    );
+
+    // 4. Crear Face Landmarker.
+    faceLandmarker=await mp.FaceLandmarker.createFromOptions(
+      vision,
+      {
+        baseOptions:{
+          modelAssetPath:
+            'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task'
+        },
+        runningMode:'VIDEO',
+        numFaces:1,
+        outputFaceBlendshapes:true,
+        outputFacialTransformationMatrixes:true
+      }
+    );
+
+    faceActive=true;
+    faceLoading=false;
+
+    faceButton.disabled=false;
+    faceButton.textContent='DETENER CÁMARA';
+
+    faceStatus.textContent='MEDIAPIPE ACTIVO / BUSCANDO ROSTRO...';
+
+    detectFaceFrame();
+
+  }catch(error){
+
+    console.error('Error MediaPipe:',error);
+
+    faceActive=false;
+    faceLoading=false;
+
+    // Liberar cámara si el proceso falló.
+    if(faceStream){
+      faceStream.getTracks().forEach(track=>track.stop());
+      faceStream=null;
+    }
+
+    faceVideo.srcObject=null;
+
+    if(faceLandmarker){
+      try{faceLandmarker.close()}catch{}
+      faceLandmarker=null;
+    }
+
+    faceButton.disabled=false;
+    faceButton.textContent='◎ ACTIVAR CÁMARA';
+
+    faceStatus.textContent='ERROR: '+error.message;
+
+    alert(
+      'No se pudo iniciar MediaPipe.\n\n' +
+      error.name + ': ' + error.message
+    );
+
+  }
+
+}
+
+function stopFaceTracking(){
+
+  faceActive=false;
+  faceLoading=false;
+
+  if(faceStream){
+    faceStream.getTracks().forEach(track=>track.stop());
+    faceStream=null;
+  }
+
+  faceVideo.srcObject=null;
+
+  if(faceLandmarker){
+    try{faceLandmarker.close()}catch{}
+    faceLandmarker=null;
+  }
+
+  faceButton.disabled=false;
+  faceButton.textContent='◎ ACTIVAR CÁMARA';
+
+  faceStatus.textContent='CÁMARA INACTIVA';
+
+  faceLatest.faceDetected=false;
+
+  faceLatest.browDown=0;
+  faceLatest.blink=0;
+  faceLatest.jawOpen=0;
+  faceLatest.squint=0;
+
+  document.getElementById('browMetric').textContent='0.00';
+  document.getElementById('blinkMetric').textContent='0.00';
+  document.getElementById('jawMetric').textContent='0.00';
+  document.getElementById('squintMetric').textContent='0.00';
+
+  geometry.setAttribute(
+    'position',
+    new THREE.Float32BufferAttribute(fallbackVertices,3)
+  );
+
+  geometry.computeBoundingSphere();
+  points.material.size=.023;
+
+}
+
+function detectFaceFrame(){
+
+  if(!faceActive || !faceLandmarker) return;
+
+  if(faceVideo.readyState<2){
+    requestAnimationFrame(detectFaceFrame);
+    return;
+  }
+
+  try{
+
+    const result=faceLandmarker.detectForVideo(
+      faceVideo,
+      performance.now()
+    );
+
+    if(result.faceLandmarks?.length){
+
+      const landmarks=result.faceLandmarks[0];
+
+      faceLatest.faceDetected=true;
+
+      // Representación de landmarks en la nube de puntos.
+      const coords=[];
+
+      for(const landmark of landmarks){
+
+      coords.push(
+  (0.5-landmark.x)*5.5,
+  (0.52-landmark.y)*6.0,
+  (-landmark.z)*4.0
+);
+
+      }
+
+      geometry.setAttribute(
+        'position',
+        new THREE.Float32BufferAttribute(coords,3)
+      );
+
+      geometry.attributes.position.needsUpdate=true;
+      geometry.computeBoundingSphere();
+
+      points.material.size=.065;
+
+      faceStatus.textContent=
+        'ROSTRO DETECTADO / '+landmarks.length+' LANDMARKS';
+
+      // Leer blendshapes.
+      const categories=result.faceBlendshapes?.[0]?.categories || [];
+
+      const scores={};
+
+      for(const item of categories){
+        scores[item.categoryName]=item.score;
+      }
+
+      const avg=(a,b)=>(
+        Number(scores[a]||0)+Number(scores[b]||0)
+      )/2;
+
+      faceLatest.browDownLeft=Number(scores.browDownLeft||0);
+      faceLatest.browDownRight=Number(scores.browDownRight||0);
+
+      faceLatest.eyeBlinkLeft=Number(scores.eyeBlinkLeft||0);
+      faceLatest.eyeBlinkRight=Number(scores.eyeBlinkRight||0);
+
+      faceLatest.jawOpenRaw=Number(scores.jawOpen||0);
+
+      faceLatest.eyeSquintLeft=Number(scores.eyeSquintLeft||0);
+      faceLatest.eyeSquintRight=Number(scores.eyeSquintRight||0);
+
+      faceLatest.browDown=avg('browDownLeft','browDownRight');
+      faceLatest.blink=avg('eyeBlinkLeft','eyeBlinkRight');
+
+      faceLatest.jawOpen=Number(scores.jawOpen||0);
+
+      faceLatest.squint=avg('eyeSquintLeft','eyeSquintRight');
+
+      document.getElementById('browMetric').textContent=
+        faceLatest.browDown.toFixed(2);
+
+      document.getElementById('blinkMetric').textContent=
+        faceLatest.blink.toFixed(2);
+
+      document.getElementById('jawMetric').textContent=
+        faceLatest.jawOpen.toFixed(2);
+
+      document.getElementById('squintMetric').textContent=
+        faceLatest.squint.toFixed(2);
+
+    }else{
+
+      faceLatest.faceDetected=false;
+
+      faceStatus.textContent='ROSTRO NO DETECTADO';
+
+      // Recuperar nube decorativa si no hay rostro.
+      if(geometry.attributes.position.count!==fallbackVertices.length/3){
+
+        geometry.setAttribute(
+          'position',
+          new THREE.Float32BufferAttribute(fallbackVertices,3)
+        );
+
+        geometry.computeBoundingSphere();
+        points.material.size=.023;
+
+      }
+
+    }
+
+  }catch(error){
+
+    console.warn('Error en detección facial:',error);
+    faceStatus.textContent='ERROR EN DETECCIÓN: '+error.message;
+
+  }
+
+  requestAnimationFrame(detectFaceFrame);
 
 }
 
 
-// Registrar evento significativo
-function registerMovement(time, pitchValue, rollValue, variation) {
+// ============================================================
+// ANIMACIÓN / ESTADO DEL SENSOR
+// ============================================================
 
-  const event = {
-    time: time,
-    pitch: pitchValue,
-    roll: rollValue,
-    variation: variation
+const rad=Math.PI/180;
+
+function animate(){
+
+  requestAnimationFrame(animate);
+
+  const p=latest.pitch-offset.pitch;
+  const r=latest.roll-offset.roll;
+  const y=latest.yaw-offset.yaw;
+
+  const target=new THREE.Euler(
+    p*rad,
+    -y*rad,
+    -r*rad,
+    'YXZ'
+  );
+
+  const q=new THREE.Quaternion().setFromEuler(target);
+
+  group.quaternion.slerp(q,.18);
+
+  for(const k of ['pitch','roll','yaw']){
+
+    document.getElementById(k).textContent=
+      (latest[k]-offset[k]).toFixed(1)+'°';
+
+  }
+
+  const sensorActive=connected&&Date.now()-lastMessage<1800;
+
+  const status=document.getElementById('status');
+
+  status.textContent=sensorActive
+    ?'SENSOR CONECTADO'
+    :'SENSOR DESCONECTADO';
+
+  status.className='status'+(sensorActive?' ok':'');
+
+  let directions=[];
+
+  if(Math.abs(y)>10){
+    directions.push(y>0?'GIRO A UN LADO':'GIRO AL OTRO LADO');
+  }
+
+  if(Math.abs(p)>10){
+    directions.push(p>0?'INCLINACIÓN FRONTAL':'INCLINACIÓN POSTERIOR');
+  }
+
+  if(Math.abs(r)>10){
+    directions.push('INCLINACIÓN LATERAL');
+  }
+
+  document.getElementById('direction').textContent=
+    sensorActive
+      ?(directions.join(' · ')||'POSICIÓN CENTRADA')
+      :'ESPERANDO SENSOR';
+
+  renderer.render(scene,camera);
+
+}
+
+animate();
+
+
+// ============================================================
+// REPRODUCTOR DE AUDIO LOCAL
+// ============================================================
+
+const audio=document.getElementById('audio');
+const fileInput=document.getElementById('audioFiles');
+
+// ============================================================
+// TONE.JS / ESPACIALIZACIÓN 3D DEL AUDIO DEL REPRODUCTOR
+// Se conecta el mismo elemento <audio> a la cadena de Tone.js.
+// Así se conservan playlist, progreso, duración y registro de tiempo.
+// ============================================================
+
+let spatialReady=false;
+let spatialSource=null;
+let spatialCompressor=null;
+let spatialPanner=null;
+let spatialFilter=null;
+let spatialReverb=null;
+let spatialLimiter=null;
+let spatialRAF=null;
+let spatialAngle=0;
+let spatialPrevious=0;
+
+const spatialMap=document.getElementById('spatialMap');
+const spatialStatus=document.getElementById('spatialStatus');
+const spatialIds=['spatialSpeed','spatialRadius','spatialElevation','spatialDepth','spatialReverb'];
+
+spatialIds.forEach(id=>{
+  const input=document.getElementById(id);
+  const output=document.getElementById(id+'Value');
+  const update=()=>{output.textContent=Number(input.value).toFixed(2);};
+  input.addEventListener('input',update);
+  update();
+});
+
+async function setupSpatialAudio(){
+  if(spatialReady) return;
+  if(!window.Tone) throw new Error('No se pudo cargar Tone.js. Revisa tu conexión a internet.');
+  await Tone.start();
+
+  const context=Tone.getContext().rawContext;
+  spatialSource=context.createMediaElementSource(audio);
+
+  spatialCompressor=new Tone.Compressor({threshold:-35,ratio:4,attack:0.01,release:0.2});
+  spatialPanner=new Tone.Panner3D({
+    panningModel:'HRTF',distanceModel:'inverse',refDistance:1,
+    maxDistance:100,rolloffFactor:0.2
+  });
+  spatialFilter=new Tone.Filter({type:'lowpass',frequency:16000,rolloff:-12});
+  spatialReverb=new Tone.Reverb({decay:3,preDelay:0.02,wet:Number(document.getElementById('spatialReverb').value)});
+  await spatialReverb.generate();
+  spatialLimiter=new Tone.Limiter(-1).toDestination();
+
+  spatialSource.connect(spatialCompressor.input);
+  spatialCompressor.connect(spatialPanner);
+  spatialPanner.connect(spatialFilter);
+  spatialFilter.connect(spatialReverb);
+  spatialReverb.connect(spatialLimiter);
+
+  spatialReady=true;
+  spatialStatus.textContent='AUDIO 3D ACTIVO';
+}
+
+function drawSpatialMap(radius){
+  const ctx=spatialMap.getContext('2d');
+  const w=spatialMap.width,h=spatialMap.height,cx=w/2,cy=h/2;
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle='#24483d';ctx.lineWidth=1;
+  [25,48,70].forEach(r=>{ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();});
+  ctx.beginPath();ctx.moveTo(cx,8);ctx.lineTo(cx,h-8);ctx.moveTo(8,cy);ctx.lineTo(w-8,cy);ctx.stroke();
+  ctx.fillStyle='#78938b';ctx.font='9px monospace';ctx.textAlign='center';
+  ctx.fillText('FRENTE',cx,10);ctx.fillText('ATRÁS',cx,h-3);
+  ctx.fillStyle='#e7fff7';ctx.beginPath();ctx.arc(cx,cy,5,0,Math.PI*2);ctx.fill();
+  const scale=65/Math.max(radius*1.6,1);
+  const x=Math.sin(spatialAngle)*radius;
+  const z=-Math.cos(spatialAngle)*radius;
+  ctx.shadowColor='#00ffc3';ctx.shadowBlur=12;ctx.fillStyle='#00ffc3';
+  ctx.beginPath();ctx.arc(cx+x*scale,cy+z*scale,6,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+}
+
+function spatialFrame(now){
+  if(audio.paused||audio.ended){spatialRAF=null;return;}
+  spatialRAF=requestAnimationFrame(spatialFrame);
+  const dt=Math.min((now-spatialPrevious)/1000,0.1);
+  spatialPrevious=now;
+  const speed=Number(document.getElementById('spatialSpeed').value);
+  const baseRadius=Number(document.getElementById('spatialRadius').value);
+  const elevation=Number(document.getElementById('spatialElevation').value);
+  const depth=Number(document.getElementById('spatialDepth').value);
+  spatialAngle+=dt*speed*2*Math.PI;
+  const radius=baseRadius*(1+depth*0.6*Math.sin(spatialAngle*2.3));
+  const x=Math.sin(spatialAngle)*radius;
+  const z=-Math.cos(spatialAngle)*radius;
+  const y=Math.sin(spatialAngle*1.7)*baseRadius*elevation;
+
+  spatialPanner.positionX.value=x;
+  spatialPanner.positionY.value=y;
+  spatialPanner.positionZ.value=z;
+  spatialFilter.frequency.value=5000+11000*(0.5+0.5*(-z/Math.max(radius,0.01)));
+  spatialReverb.wet.value=Number(document.getElementById('spatialReverb').value);
+  drawSpatialMap(baseRadius);
+}
+
+async function playAudio(){
+  try{
+    await setupSpatialAudio();
+    await audio.play();
+  }catch(error){
+    console.error('Error de audio espacial:',error);
+    spatialStatus.textContent='ERROR DE AUDIO';
+    alert('No se pudo iniciar el audio: '+error.message);
+  }
+}
+
+const playlistEl=document.getElementById('playlist');
+const titleEl=document.getElementById('trackTitle');
+const subEl=document.getElementById('trackSub');
+
+const playBtn=document.getElementById('play');
+const progress=document.getElementById('progress');
+
+let tracks=[];
+let current=-1;
+const urls=[];
+
+const wave=document.getElementById('wave');
+
+for(let i=0;i<54;i++){
+
+  const bar=document.createElement('i');
+
+  bar.style.setProperty(
+    '--h',
+    (12+Math.abs(Math.sin(i*.53)*Math.cos(i*.17))*68)+'px'
+  );
+
+  wave.appendChild(bar);
+
+}
+
+function timeLabel(s){
+
+  if(!Number.isFinite(s)) return '00:00';
+
+  const m=Math.floor(s/60);
+  const sec=Math.floor(s%60);
+
+  return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+
+}
+
+function renderPlaylist(){
+
+  playlistEl.innerHTML='';
+
+  if(!tracks.length){
+
+    playlistEl.innerHTML=
+      '<div class="empty">Aún no hay archivos.<br>Agrega uno o varios audios desde tu computador para comenzar.</div>';
+
+    return;
+
+  }
+
+  tracks.forEach((track,i)=>{
+
+    const b=document.createElement('button');
+
+    b.className='track'+(i===current?' active':'');
+
+    const n=document.createElement('span');
+    n.className='track-num';
+    n.textContent=String(i+1).padStart(2,'0');
+
+    const name=document.createElement('span');
+    name.className='track-name';
+    name.textContent=track.name;
+
+    b.append(n,name);
+
+    b.addEventListener('click',()=>loadTrack(i,true));
+
+    playlistEl.appendChild(b);
+
+  });
+
+}
+
+function loadTrack(i,autoplay=false){
+
+  if(i<0||i>=tracks.length) return;
+
+  current=i;
+
+  audio.src=tracks[i].url;
+
+  titleEl.textContent=tracks[i].name;
+
+  subEl.textContent=
+    'ARCHIVO LOCAL · '+(tracks[i].type||'AUDIO').toUpperCase();
+
+  progress.value=0;
+
+  document.getElementById('currentTime').textContent='00:00';
+  document.getElementById('duration').textContent='00:00';
+
+  renderPlaylist();
+
+  if(autoplay){
+    playAudio();
+  }else{
+    playBtn.textContent='▶';
+  }
+
+}
+
+fileInput.addEventListener('change',e=>{
+
+  const files=Array.from(e.target.files||[]);
+
+  files.forEach(file=>{
+
+    const url=URL.createObjectURL(file);
+
+    urls.push(url);
+
+    tracks.push({
+      name:file.name,
+      url,
+      type:file.type.split('/')[1]||'audio'
+    });
+
+  });
+
+  if(current<0&&tracks.length){
+    loadTrack(0);
+  }else{
+    renderPlaylist();
+  }
+
+  fileInput.value='';
+
+});
+
+playBtn.addEventListener('click',()=>{
+
+  if(!tracks.length){
+    fileInput.click();
+    return;
+  }
+
+  if(audio.paused){
+    playAudio();
+  }else{
+    audio.pause();
+  }
+
+});
+
+document.getElementById('prev').addEventListener('click',()=>{
+
+  if(tracks.length){
+    loadTrack((current-1+tracks.length)%tracks.length,true);
+  }
+
+});
+
+document.getElementById('next').addEventListener('click',()=>{
+
+  if(tracks.length){
+    loadTrack((current+1)%tracks.length,true);
+  }
+
+});
+
+audio.addEventListener('play',()=>{
+  playBtn.textContent='Ⅱ';
+  wave.classList.add('playing');
+  if(spatialRAF===null){spatialPrevious=performance.now();spatialRAF=requestAnimationFrame(spatialFrame);}
+});
+
+audio.addEventListener('pause',()=>{
+  playBtn.textContent='▶';
+  wave.classList.remove('playing');
+  if(spatialRAF!==null){cancelAnimationFrame(spatialRAF);spatialRAF=null;}
+});
+
+audio.addEventListener('ended',()=>{
+  if(spatialRAF!==null){cancelAnimationFrame(spatialRAF);spatialRAF=null;}
+
+  if(tracks.length){
+    loadTrack((current+1)%tracks.length,true);
+  }
+
+});
+
+audio.addEventListener('loadedmetadata',()=>{
+  document.getElementById('duration').textContent=timeLabel(audio.duration);
+});
+
+audio.addEventListener('timeupdate',()=>{
+
+  if(Number.isFinite(audio.duration)&&audio.duration>0){
+
+    progress.value=Math.round(audio.currentTime/audio.duration*1000);
+
+    document.getElementById('currentTime').textContent=
+      timeLabel(audio.currentTime);
+
+  }
+
+});
+
+progress.addEventListener('input',()=>{
+
+  if(Number.isFinite(audio.duration)&&audio.duration>0){
+
+    audio.currentTime=(progress.value/1000)*audio.duration;
+
+  }
+
+});
+
+const volume=document.getElementById('volume');
+
+audio.volume=Number(volume.value);
+
+volume.addEventListener('input',()=>{
+
+  audio.volume=Number(volume.value);
+
+  document.getElementById('volumeValue').textContent=
+    Math.round(audio.volume*100)+'%';
+
+});
+
+
+// ============================================================
+// REGISTRO DE MOVIMIENTO CORPORAL
+// ============================================================
+
+const recordedSamples=[];
+const movementEvents=[];
+
+let subjectiveScore=null;
+
+const eventsBody=document.getElementById('eventsBody');
+const eventCounter=document.getElementById('eventCounter');
+const sampleCounter=document.getElementById('sampleCounter');
+const recordStatus=document.getElementById('recordStatus');
+
+const MOVEMENT_THRESHOLD=8;
+const EVENT_COOLDOWN=600;
+
+let lastEventReference=null;
+let lastEventTime=0;
+
+const chartContext=document
+  .getElementById('movementChart')
+  .getContext('2d');
+
+const movementChart=new Chart(chartContext,{
+
+  type:'line',
+
+  data:{
+    datasets:[
+      {
+        label:'Pitch',
+        data:[],
+        borderColor:'#00ffc3',
+        backgroundColor:'#00ffc3',
+        borderWidth:1.8,
+        pointRadius:0,
+        tension:0.2
+      },
+      {
+        label:'Roll',
+        data:[],
+        borderColor:'#ffbf69',
+        backgroundColor:'#ffbf69',
+        borderWidth:1.8,
+        pointRadius:0,
+        tension:0.2,
+        yAxisID:'y'
+      },
+      {
+        label:'Ceño (MediaPipe)',
+        data:[],
+        borderColor:'#b58cff',
+        backgroundColor:'#b58cff',
+        borderWidth:1.5,
+        pointRadius:0,
+        tension:0.2,
+        yAxisID:'face'
+      },
+      {
+        label:'Parpadeo (MediaPipe)',
+        data:[],
+        borderColor:'#ff78b5',
+        backgroundColor:'#ff78b5',
+        borderWidth:1.5,
+        pointRadius:0,
+        tension:0.2,
+        yAxisID:'face'
+      },
+      {
+        label:'Apertura de boca (MediaPipe)',
+        data:[],
+        borderColor:'#62b7ff',
+        backgroundColor:'#62b7ff',
+        borderWidth:1.5,
+        pointRadius:0,
+        tension:0.2,
+        yAxisID:'face'
+      },
+      {
+        label:'Entrecierre (MediaPipe)',
+        data:[],
+        borderColor:'#f5e56b',
+        backgroundColor:'#f5e56b',
+        borderWidth:1.5,
+        pointRadius:0,
+        tension:0.2,
+        yAxisID:'face'
+      }
+    ]
+  },
+
+  options:{
+
+    responsive:true,
+    maintainAspectRatio:false,
+    animation:false,
+
+    interaction:{
+      intersect:false,
+      mode:'index'
+    },
+
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'#0a1110',
+        borderColor:'#18352f',
+        borderWidth:1
+      }
+    },
+
+    scales:{
+
+      x:{
+        type:'linear',
+        title:{
+          display:true,
+          text:'TIEMPO DEL AUDIO (SEGUNDOS)',
+          color:'#78938b'
+        },
+        ticks:{
+          color:'#78938b',
+          callback:value=>timeLabel(value)
+        },
+        grid:{color:'#18352f'}
+      },
+
+      y:{
+        type:'linear',
+        position:'left',
+        title:{
+          display:true,
+          text:'MOVIMIENTO DE CABEZA (GRADOS °)',
+          color:'#78938b'
+        },
+        ticks:{color:'#78938b'},
+        grid:{color:'#18352f'}
+      },
+      face:{
+        type:'linear',
+        position:'right',
+        min:0,
+        max:1,
+        title:{
+          display:true,
+          text:'INDICADORES FACIALES (0–1)',
+          color:'#78938b'
+        },
+        ticks:{color:'#78938b'},
+        grid:{drawOnChartArea:false}
+      }
+
+    }
+
+  }
+
+});
+
+
+function formatEventTime(seconds){
+
+  const minutes=Math.floor(seconds/60);
+  const remainingSeconds=Math.floor(seconds%60);
+
+  return String(minutes).padStart(2,'0')+
+    ':'+
+    String(remainingSeconds).padStart(2,'0');
+
+}
+
+
+function registerMovement(time,pitchValue,rollValue,variation){
+
+  const event={
+    time,
+    pitch:pitchValue,
+    roll:rollValue,
+    variation
   };
 
   movementEvents.push(event);
 
-  const row = document.createElement('tr');
+  const row=document.createElement('tr');
 
-  const values = [
+  const values=[
     formatEventTime(time),
     pitchValue.toFixed(1),
     rollValue.toFixed(1),
     variation.toFixed(1)
   ];
 
-  values.forEach(value => {
-    const cell = document.createElement('td');
-    cell.textContent = value;
+  values.forEach(value=>{
+
+    const cell=document.createElement('td');
+
+    cell.textContent=value;
+
     row.appendChild(cell);
+
   });
 
   eventsBody.querySelector('.table-empty')?.parentElement.remove();
 
   eventsBody.appendChild(row);
 
-  eventCounter.textContent =
-    movementEvents.length + ' MOVIMIENTOS';
+  eventCounter.textContent=
+    movementEvents.length+' MOVIMIENTOS';
 
 }
 
 
-// Muestreo continuo cada 100 ms
-setInterval(() => {
+// Muestreo cada 100 ms mientras se reproduce audio.
+ // MediaPipe puede registrarse aunque el ESP32 no esté conectado.
+setInterval(()=>{
 
-  // Solo registrar mientras se reproduce el audio
-  if (audio.paused || audio.ended || !connected) {
+  if(audio.paused||audio.ended){
     return;
   }
 
-  const currentTime = audio.currentTime;
+  const sensorAvailable=connected&&(Date.now()-lastMessage<1800);
+  const faceAvailable=faceActive;
 
-  // Usar la orientación relativa a la referencia visual
-  const pitchValue = latest.pitch - offset.pitch;
-  const rollValue = latest.roll - offset.roll;
-
-  if (!Number.isFinite(pitchValue) ||
-      !Number.isFinite(rollValue)) {
+  // No registrar muestras vacías si ninguno de los dos sistemas está activo.
+  if(!sensorAvailable&&!faceAvailable){
+    lastEventReference=null;
     return;
   }
 
-  // Guardar muestra continua
+  const currentTime=audio.currentTime;
+
+  const pitchValue=sensorAvailable
+    ?latest.pitch-offset.pitch
+    :null;
+  const rollValue=sensorAvailable
+    ?latest.roll-offset.roll
+    :null;
+  const yawValue=sensorAvailable
+    ?latest.yaw-offset.yaw
+    :null;
+
   recordedSamples.push({
 
-    time: currentTime,
-    pitch: pitchValue,
-    roll: rollValue
+    time:currentTime,
+    track:tracks[current]?.name||titleEl.textContent||'',
+
+    // Si el ESP32 no está conectado, sus campos quedan vacíos en el CSV.
+    pitch:pitchValue,
+    roll:rollValue,
+    yaw:yawValue,
+
+    faceDetected:faceAvailable&&faceLatest.faceDetected,
+    browDown:faceAvailable?faceLatest.browDown:null,
+    blink:faceAvailable?faceLatest.blink:null,
+    jawOpen:faceAvailable?faceLatest.jawOpen:null,
+    squint:faceAvailable?faceLatest.squint:null,
+
+    subjectiveScore
 
   });
 
-  // Agregar valores a la gráfica
-  movementChart.data.datasets[0].data.push({
-    x: currentTime,
-    y: pitchValue
-  });
+  // Las seis señales comparten el mismo eje temporal.
+  // Pitch/Roll vienen del ESP32; las cuatro señales faciales, de MediaPipe.
+  const faceDetectedNow=faceAvailable&&faceLatest.faceDetected;
+  const chartValues=[
+    pitchValue,
+    rollValue,
+    faceDetectedNow?faceLatest.browDown:null,
+    faceDetectedNow?faceLatest.blink:null,
+    faceDetectedNow?faceLatest.jawOpen:null,
+    faceDetectedNow?faceLatest.squint:null
+  ];
 
-  movementChart.data.datasets[1].data.push({
-    x: currentTime,
-    y: rollValue
+  chartValues.forEach((value,index)=>{
+    movementChart.data.datasets[index].data.push({
+      x:currentTime,
+      y:value
+    });
   });
 
   movementChart.update('none');
 
-  sampleCounter.textContent =
-    recordedSamples.length + ' MUESTRAS REGISTRADAS';
+  // La detección de eventos bruscos sigue dependiendo del ESP32.
+  if(sensorAvailable){
 
-  // Detectar movimiento significativo
-  if (lastEventReference === null) {
+    if(lastEventReference===null){
 
-    lastEventReference = {
-      pitch: pitchValue,
-      roll: rollValue
-    };
+      lastEventReference={
+        pitch:pitchValue,
+        roll:rollValue
+      };
 
-    return;
+    }else{
+
+      const pitchChange=Math.abs(
+        pitchValue-lastEventReference.pitch
+      );
+
+      const rollChange=Math.abs(
+        rollValue-lastEventReference.roll
+      );
+
+      const variation=Math.sqrt(
+        Math.pow(pitchValue-lastEventReference.pitch,2)+
+        Math.pow(rollValue-lastEventReference.roll,2)
+      );
+
+      const now=Date.now();
+
+      if(
+        (pitchChange>=MOVEMENT_THRESHOLD||
+         rollChange>=MOVEMENT_THRESHOLD)&&
+        now-lastEventTime>=EVENT_COOLDOWN
+      ){
+
+        registerMovement(
+          currentTime,
+          pitchValue,
+          rollValue,
+          variation
+        );
+
+        lastEventReference={
+          pitch:pitchValue,
+          roll:rollValue
+        };
+
+        lastEventTime=now;
+      }
+    }
+
+  }else{
+    lastEventReference=null;
   }
 
-  const pitchChange = Math.abs(
-    pitchValue - lastEventReference.pitch
-  );
+  sampleCounter.textContent=
+    recordedSamples.length+' MUESTRAS REGISTRADAS';
 
-  const rollChange = Math.abs(
-    rollValue - lastEventReference.roll
-  );
-
-  const variation = Math.sqrt(
-    Math.pow(pitchValue - lastEventReference.pitch, 2) +
-    Math.pow(rollValue - lastEventReference.roll, 2)
-  );
-
-  const now = Date.now();
-
-  if (
-    (pitchChange >= MOVEMENT_THRESHOLD ||
-     rollChange >= MOVEMENT_THRESHOLD) &&
-    now - lastEventTime >= EVENT_COOLDOWN
-  ) {
-
-    registerMovement(
-      currentTime,
-      pitchValue,
-      rollValue,
-      variation
-    );
-
-    lastEventReference = {
-      pitch: pitchValue,
-      roll: rollValue
-    };
-
-    lastEventTime = now;
-
-  }
-
-}, 100);
+},100);
 
 
-// Estado visual de registro
-audio.addEventListener('play', () => {
-  recordStatus.textContent = 'REGISTRO ACTIVO';
+audio.addEventListener('play',()=>{
+  recordStatus.textContent='REGISTRO ACTIVO';
 });
 
-audio.addEventListener('pause', () => {
-  recordStatus.textContent = 'REGISTRO EN PAUSA';
+audio.addEventListener('pause',()=>{
+  recordStatus.textContent='REGISTRO EN PAUSA';
 });
 
-audio.addEventListener('ended', () => {
-  recordStatus.textContent = 'REGISTRO FINALIZADO';
+audio.addEventListener('ended',()=>{
+  recordStatus.textContent='REGISTRO FINALIZADO';
 });
 
 
-// Descargar datos CSV
-document.getElementById('downloadCSV').addEventListener('click', () => {
+// ============================================================
+// EXPORTACIÓN CSV
+// ============================================================
 
-  if (recordedSamples.length === 0) {
+document.getElementById('downloadCSV').addEventListener('click',()=>{
+
+  if(recordedSamples.length===0){
     alert('Todavía no hay datos registrados.');
     return;
   }
 
-  const rows = [
-    ['TIPO', 'TIEMPO_SEGUNDOS', 'TIEMPO_AUDIO', 'PITCH', 'ROLL', 'VARIACION']
+  const rows=[
+
+    [
+      'TIPO',
+      'AUDIO',
+      'TIEMPO_SEGUNDOS',
+      'TIEMPO_AUDIO',
+      'PITCH',
+      'ROLL',
+      'YAW',
+      'ROSTRO_DETECTADO',
+      'CEJAS_BROW_DOWN',
+      'PARPADEO_BLINK',
+      'APERTURA_BOCA_JAW_OPEN',
+      'ENTRECIERRE_SQUINT',
+      'RESPUESTA_SUBJETIVA_0_10',
+      'VARIACION'
+    ]
+
   ];
 
-  // Muestras continuas
-  recordedSamples.forEach(sample => {
+  recordedSamples.forEach(sample=>{
 
     rows.push([
+
       'MUESTRA',
+      sample.track,
       sample.time.toFixed(2),
       formatEventTime(sample.time),
-      sample.pitch.toFixed(2),
-      sample.roll.toFixed(2),
+      sample.pitch===null?'':sample.pitch.toFixed(2),
+      sample.roll===null?'':sample.roll.toFixed(2),
+      sample.yaw===null?'':sample.yaw.toFixed(2),
+
+      sample.faceDetected?'SI':'NO',
+
+      sample.browDown===null?'':sample.browDown.toFixed(3),
+      sample.blink===null?'':sample.blink.toFixed(3),
+      sample.jawOpen===null?'':sample.jawOpen.toFixed(3),
+      sample.squint===null?'':sample.squint.toFixed(3),
+
+      sample.subjectiveScore??'',
       ''
+
     ]);
 
   });
 
-  // Eventos significativos
-  movementEvents.forEach(event => {
+  if(subjectiveScore!==null){
+
+    const audioTime=Number.isFinite(audio.currentTime)
+      ?audio.currentTime
+      :0;
 
     rows.push([
+
+      'AUTO_REPORTE',
+      tracks[current]?.name||titleEl.textContent||'',
+      audioTime.toFixed(2),
+      formatEventTime(audioTime),
+
+      '',
+      '',
+      '',
+
+      faceLatest.faceDetected?'SI':'NO',
+
+      faceLatest.browDown.toFixed(3),
+      faceLatest.blink.toFixed(3),
+      faceLatest.jawOpen.toFixed(3),
+      faceLatest.squint.toFixed(3),
+
+      subjectiveScore,
+      ''
+
+    ]);
+
+  }
+
+  movementEvents.forEach(event=>{
+
+    rows.push([
+
       'MOVIMIENTO',
+      tracks[current]?.name||titleEl.textContent||'',
+
       event.time.toFixed(2),
       formatEventTime(event.time),
+
       event.pitch.toFixed(2),
       event.roll.toFixed(2),
+      (latest.yaw-offset.yaw).toFixed(2),
+
+      faceLatest.faceDetected?'SI':'NO',
+
+      faceLatest.browDown.toFixed(3),
+      faceLatest.blink.toFixed(3),
+      faceLatest.jawOpen.toFixed(3),
+      faceLatest.squint.toFixed(3),
+
+      subjectiveScore??'',
       event.variation.toFixed(2)
+
     ]);
 
   });
 
-  const csvContent = rows
-    .map(row => row.join(';'))
-    .join('\n');
+  // Escapar comillas y separadores para evitar CSV mal formado.
+  const csvContent=rows.map(row=>
+    row.map(value=>{
+      const text=String(value??'');
+      return '"'+text.replace(/"/g,'""')+'"';
+    }).join(';')
+  ).join('\n');
 
-  const blob = new Blob(
-    ['\uFEFF' + csvContent],
-    { type: 'text/csv;charset=utf-8;' }
+  const blob=new Blob(
+    ['\uFEFF'+csvContent],
+    {type:'text/csv;charset=utf-8;'}
   );
 
-  const url = URL.createObjectURL(blob);
+  const url=URL.createObjectURL(blob);
 
-  const link = document.createElement('a');
+  const link=document.createElement('a');
 
-  link.href = url;
-  link.download = 'revera_registro_corporal.csv';
+  link.href=url;
+  link.download='revera_registro_corporal.csv';
 
   link.click();
 
-  URL.revokeObjectURL(url);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
 
 });
-window.addEventListener('beforeunload',()=>urls.forEach(URL.revokeObjectURL));
-window.addEventListener('beforeunload',()=>urls.forEach(URL.revokeObjectURL));
+
+
+// ============================================================
+// CIERRE / LIMPIEZA
+// ============================================================
+
+window.addEventListener('beforeunload',()=>{
+
+  urls.forEach(url=>URL.revokeObjectURL(url));
+
+  faceActive=false;
+
+  faceStream?.getTracks().forEach(track=>track.stop());
+
+  try{serialReader?.cancel()}catch{}
+  try{serialPort?.close()}catch{}
+
+});
+
+
+// ============================================================
 // ESCALA DE PERCEPCIÓN CORPORAL
-const scaleButtons = document.querySelectorAll('.scale-circle');
-const scaleResult = document.getElementById('scaleResult');
+// ============================================================
 
-scaleButtons.forEach(button => {
+const scaleButtons=document.querySelectorAll('.scale-circle');
+const scaleResult=document.getElementById('scaleResult');
 
-  button.addEventListener('click', () => {
+scaleButtons.forEach(button=>{
 
-    const value = Number(button.dataset.value);
+  button.addEventListener('click',()=>{
 
-    // Quitar selección anterior
-    scaleButtons.forEach(btn => {
+    const value=Number(button.dataset.value);
+
+    subjectiveScore=value;
+
+    scaleButtons.forEach(btn=>{
       btn.classList.remove('selected');
     });
 
-    // Marcar selección actual
     button.classList.add('selected');
 
-    // Clasificar respuesta
-    let category = '';
+    let category='';
 
-    if (value <= 3) {
-      category = 'CALMA / REPOSO';
-    } else if (value <= 6) {
-      category = 'IRRITABILIDAD / TENSIÓN MODERADA';
-    } else {
-      category = 'SOBRECARGA / ESTRÉS CRÍTICO';
+    if(value<=3){
+      category='CALMA / REPOSO';
+    }else if(value<=6){
+      category='IRRITABILIDAD / TENSIÓN MODERADA';
+    }else{
+      category='SOBRECARGA / ESTRÉS CRÍTICO';
     }
 
-    // Mostrar resultado
-    scaleResult.innerHTML = `
+    scaleResult.innerHTML=`
       RESPUESTA REGISTRADA
       <strong>NIVEL ${value} — ${category}</strong>
     `;
@@ -891,6 +2435,7 @@ scaleButtons.forEach(button => {
   });
 
 });
+
 </script>
 </body>
 </html>
